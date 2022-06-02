@@ -5,19 +5,35 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.Setter;
 
+import javax.validation.constraints.*;
 import java.time.Duration;
 import java.time.LocalDate;
 
 @Data
-public class Film {
+public class Film extends Entity{
 
-    private int id;
+    public static final LocalDate minDate = LocalDate.of(1997,10,10);
+
+    @NonNull
+    @NotBlank
     private final String name;
+    @NonNull
+    @Size(max = 200, message = "Description name longer than 200 symbols")
     private final String description;
     @NonNull
+    @Past
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate releaseDate;
     @NonNull
     private Duration duration;
 
+    @Override
+    public String toString() {
+        return "Film{" +
+                "id=" + super.getId() +
+                ", name='" + name + '\'' +
+                ", releaseDate=" + releaseDate +
+                ", duration=" + duration +
+                '}';
+    }
 }
