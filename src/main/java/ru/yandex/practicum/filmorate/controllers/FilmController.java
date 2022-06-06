@@ -43,14 +43,13 @@ public class FilmController {
 
     @PutMapping
     public Film putFilm(@RequestBody @Valid Film film) throws IdIsNotValidException {
+        EntityValidator.throwIfIdIsNotPositive(film);
         FilmTimeValidator.isDateValid(film);
         if (films.containsKey(film.getId())) {
-            EntityValidator.throwIfIdIsNotPositive(film);
             films.put(film.getId(), film);
             log.info(film + " updated");
         } else {
             film.setId(getNextId());
-            EntityValidator.throwIfIdIsNotPositive(film);
             films.put(film.getId(), film);
             log.info(film + " added to memory");
         }

@@ -25,7 +25,8 @@ public class Film extends Entity{
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate releaseDate;
     @NonNull
-    private Duration duration;
+    @Positive
+    private int duration;
 
     @Override
     public String toString() {
@@ -36,4 +37,6 @@ public class Film extends Entity{
                 ", duration=" + duration +
                 '}';
     }
+
+    
 }

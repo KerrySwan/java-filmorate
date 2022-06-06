@@ -42,14 +42,13 @@ public class UserController {
 
     @PutMapping
     public User putUser(@RequestBody @Valid User user) throws NameIsInvalidException, IdIsNotValidException {
+        EntityValidator.throwIfIdIsNotPositive(user);
         if (!UserValidator.isUserNameValid(user)) user.setName(user.getLogin());
         if (users.containsKey(user.getId())) {
-            EntityValidator.throwIfIdIsNotPositive(user);
             users.put(user.getId(), user);
             log.info(user + " updated");
         } else {
             user.setId(getNextId());
-            EntityValidator.throwIfIdIsNotPositive(user);
             users.put(user.getId(), user);
             log.info(user + " added to memory");
         }
