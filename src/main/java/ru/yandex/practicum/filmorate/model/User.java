@@ -14,11 +14,9 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class User extends Entity {
-    @NonNull
     @Email(message = "E-mail must be declared properly")
     @NotBlank(message = "E-mail must not be empty or blank")
     private String email;
-    @NonNull
     @NotBlank(message = "Login must not be empty or blank")
     @Pattern(regexp = "\\w+", message = "Login must be declared properly")
     private String login;

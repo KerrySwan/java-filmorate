@@ -12,9 +12,6 @@ import java.time.LocalDate;
 @Data
 public class Film extends Entity{
 
-    public static final LocalDate minDate = LocalDate.of(1997,10,10);
-
-    @NonNull
     @NotBlank
     private final String name;
     @NonNull

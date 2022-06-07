@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.client;
+package ru.yandex.practicum.filmorate;
 
 import java.io.IOException;
 import java.net.URI;

@@ -6,8 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.net.http.HttpResponse;
 
-import ru.yandex.practicum.filmorate.client.HttpFlimorateClient;
-
 @SpringBootTest
 class UsersControllerTests {
 
