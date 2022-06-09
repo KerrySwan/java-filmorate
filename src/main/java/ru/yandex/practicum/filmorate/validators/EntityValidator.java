@@ -11,9 +11,9 @@ import java.time.LocalDate;
 @Slf4j
 public class EntityValidator {
 
-    public static final LocalDate minDate = LocalDate.of(1895,1,28);
+    private static final LocalDate minDate = LocalDate.of(1895,1,28);
 
-    public static void throwIfIdIsNotPositive(Entity entity) throws EntityIsNotValidException {
+    public static void throwIfIdIsNotPositive(Entity entity) {
         if (entity.getId() <= 0) {
             EntityIsNotValidException e =  new EntityIsNotValidException("Entities id is zero or below, current id:" + entity.getId());
             log.error(e.getMessage() ,e);
@@ -21,7 +21,7 @@ public class EntityValidator {
         }
     }
 
-    public static boolean isUserNameValid(User user) throws EntityIsNotValidException {
+    public static boolean isUserNameValid(User user) {
         String name = user.getName();
         if (name == null) {
             log.warn("passed name is null");
@@ -41,7 +41,7 @@ public class EntityValidator {
         }
     }
 
-    public static void isDateValid(Film film) throws EntityIsNotValidException {
+    public static void isDateValid(Film film) {
         if (film.getReleaseDate().isBefore(minDate)){
             EntityIsNotValidException e = new EntityIsNotValidException("Date is invalid. Film's release must be after 28.01.1895");
             log.error("Release date is invalid. Film's id:" + film.getId() + " release must be after 28.01.1895\n" +

@@ -30,7 +30,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film addFilm(@RequestBody @Valid Film film) throws EntityIsNotValidException {
+    public Film addFilm(@RequestBody @Valid Film film) {
         EntityValidator.isDateValid(film);
         film.setId(getNextId());
         EntityValidator.throwIfIdIsNotPositive(film);
@@ -40,16 +40,14 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film putFilm(@RequestBody @Valid Film film) throws EntityIsNotValidException {
+    public Film putFilm(@RequestBody @Valid Film film) {
         EntityValidator.throwIfIdIsNotPositive(film);
         EntityValidator.isDateValid(film);
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             log.info(film + " updated");
         } else {
-            film.setId(getNextId());
-            films.put(film.getId(), film);
-            log.info(film + " added to memory");
+            log.warn(film + " does not exist");
         }
 
         return film;

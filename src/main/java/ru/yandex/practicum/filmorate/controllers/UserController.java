@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User addUser(@RequestBody @Valid User user) throws EntityIsNotValidException {
+    public User addUser(@RequestBody @Valid User user) {
         if (!EntityValidator.isUserNameValid(user)) user.setName(user.getLogin());
         user.setId(getNextId());
         EntityValidator.throwIfIdIsNotPositive(user);
@@ -39,16 +39,14 @@ public class UserController {
     }
 
     @PutMapping
-    public User putUser(@RequestBody @Valid User user) throws EntityIsNotValidException {
+    public User putUser(@RequestBody @Valid User user) {
         EntityValidator.throwIfIdIsNotPositive(user);
         if (!EntityValidator.isUserNameValid(user)) user.setName(user.getLogin());
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
             log.info(user + " updated");
         } else {
-            user.setId(getNextId());
-            users.put(user.getId(), user);
-            log.info(user + " added to memory");
+            log.info(user + " does not exist");
         }
 
         return user;
