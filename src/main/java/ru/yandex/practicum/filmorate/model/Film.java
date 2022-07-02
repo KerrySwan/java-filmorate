@@ -1,16 +1,21 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
-import javax.validation.constraints.*;
-import java.time.Duration;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-public class Film extends Entity{
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Film extends Entity implements Comparable<Film> {
 
     @NotBlank
     private final String name;
@@ -25,6 +30,15 @@ public class Film extends Entity{
     @Positive
     private int duration;
 
+    @Setter(value = AccessLevel.PRIVATE)
+    private Set<Long> likes;
+
+    public Set<Long> getLikes() {
+        if (likes == null) {
+            return likes = new HashSet<>();
+        } else return likes;
+    }
+
     @Override
     public String toString() {
         return "Film{" +
@@ -35,5 +49,18 @@ public class Film extends Entity{
                 '}';
     }
 
-    
+    public int getLikesCount() {
+        if (likes == null) {
+            return 0;
+        } else return likes.size();
+
+    }
+
+    @Override
+    public int compareTo(Film film) {
+        int comp =  film.getLikesCount() - this.getLikesCount();
+        if (comp == 0) return this.getName().compareTo(film.getName());
+        return comp;
+    }
+
 }
