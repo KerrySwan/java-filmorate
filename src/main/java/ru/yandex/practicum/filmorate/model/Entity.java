@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class Entity {
 
-    private int id;
+    private long id;
 
 }

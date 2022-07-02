@@ -31,9 +31,9 @@ public class Film extends Entity implements Comparable<Film> {
     private int duration;
 
     @Setter(value = AccessLevel.PRIVATE)
-    private Set<Integer> likes;
+    private Set<Long> likes;
 
-    public Set<Integer> getLikes() {
+    public Set<Long> getLikes() {
         if (likes == null) {
             return likes = new HashSet<>();
         } else return likes;

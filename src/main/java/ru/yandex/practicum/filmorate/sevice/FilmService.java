@@ -23,7 +23,7 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public Film getFilm(int id) {
+    public Film getFilm(long id) {
         return filmStorage.getFilm(id);
     }
 
@@ -35,7 +35,7 @@ public class FilmService {
         return filmStorage.putFilm(film);
     }
 
-    public void addLike(int filmId, int userId) {
+    public void addLike(long filmId, long userId) {
         Film film = filmStorage.getFilm(filmId);
         if (film.getLikes().contains(userId)) {
             log.warn("User with id " + userId + " has already liked this film");
@@ -46,7 +46,7 @@ public class FilmService {
 
     }
 
-    public void removeLike(int filmId, int userId) {
+    public void removeLike(long filmId, long userId) {
         Film film = filmStorage.getFilm(filmId);
         film.getLikes().remove(userId);
         log.info("User with id " + userId + " removed liked for film by id " + filmId);

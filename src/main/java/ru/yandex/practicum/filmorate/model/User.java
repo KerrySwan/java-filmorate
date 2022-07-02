@@ -29,9 +29,9 @@ public class User extends Entity {
     private LocalDate birthday;
 
     @Setter(value = AccessLevel.PRIVATE)
-    private Set<Integer> friends;
+    private Set<Long> friends;
 
-    public Set<Integer> getFriends() {
+    public Set<Long> getFriends() {
         if (friends == null) {
             return friends = new HashSet<>();
         } else return friends;

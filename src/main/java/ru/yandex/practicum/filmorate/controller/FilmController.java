@@ -2,12 +2,14 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.sevice.FilmService;
 import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +18,7 @@ import java.util.Set;
 @RestController
 @Component
 @RequiredArgsConstructor
+@Validated
 public class FilmController {
 
     final private FilmService service;
@@ -26,8 +29,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/{id}")
-    public Film getFilm(@PathVariable(name = "id") int filmId) {
-        EntityValidator.throwIfIdIsNotPositive(filmId);
+    public Film getFilm(@PathVariable(name = "id") @Positive int filmId) {
         return service.getFilm(filmId);
     }
 
@@ -42,22 +44,18 @@ public class FilmController {
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
-    public void addLike(@PathVariable(name = "id") int filmId, @PathVariable int userId) {
-        EntityValidator.throwIfIdIsNotPositive(filmId);
-        EntityValidator.throwIfIdIsNotPositive(userId);
+    public void addLike(@PathVariable(name = "id") @Positive long filmId, @PathVariable @Positive long userId) {
         service.addLike(filmId, userId);
     }
 
     @DeleteMapping(value = "/films/{id}/like/{userId}")
-    public void removeLike(@PathVariable(name = "id") int filmId, @PathVariable int userId) {
-        EntityValidator.throwIfIdIsNotPositive(filmId);
-        EntityValidator.throwIfIdIsNotPositive(userId);
+    public void removeLike(@PathVariable(name = "id") @Positive long filmId, @PathVariable @Positive long userId) {
         service.removeLike(filmId, userId);
     }
 
     @GetMapping(value = "/films/popular")
-    public Set<Film> getPopular(@RequestParam Optional<Integer> count) {
-        return service.getOrderedSet(count.orElse(10));
+    public Set<Film> getPopular(@RequestParam(required = false, defaultValue = "10") @Positive int count) {
+        return service.getOrderedSet(count);
     }
 
 }
