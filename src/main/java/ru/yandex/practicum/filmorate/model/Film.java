@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import ru.yandex.practicum.filmorate.model.type.Genre;
+import ru.yandex.practicum.filmorate.model.type.Rating;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
