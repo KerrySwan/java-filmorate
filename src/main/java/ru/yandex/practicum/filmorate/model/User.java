@@ -9,7 +9,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -28,12 +30,18 @@ public class User extends Entity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 
+    /***
+     * If one user had sent addFriend request to another, both of them got befriended with FALSE boolean status.
+     * This status means that second user had not sent approval with same request.
+     * After sending request from both of them status gets updated with TRUE.
+     * This can be useful to create some kind of 'Follower' status.
+     * */
     @Setter(value = AccessLevel.PRIVATE)
-    private Set<Long> friends;
+    private Map<Long, Boolean> friends;
 
-    public Set<Long> getFriends() {
+    public Map<Long, Boolean> getFriends() {
         if (friends == null) {
-            return friends = new HashSet<>();
+            return friends = new HashMap<>();
         } else return friends;
     }
 

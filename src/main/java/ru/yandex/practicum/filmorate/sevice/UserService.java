@@ -35,8 +35,9 @@ public class UserService {
         User user = userStorage.getUser(userId);
         User friend = userStorage.getUser(friendId);
         if (user != friend) {
-            user.getFriends().add(friendId);
-            friend.getFriends().add(userId);
+            boolean isAccepted = friend.getFriends().containsKey(userId);
+            user.getFriends().put(friendId, isAccepted);
+            friend.getFriends().put(userId, isAccepted);
             log.info("Users with ids " + userId + " and " + friendId + " befriended.");
         } else {
             log.warn("Impossible to befriend yourself.");
@@ -54,13 +55,13 @@ public class UserService {
     public List<User> getMutualFriends(long userId, long friendId) {
         User user = userStorage.getUser(userId);
         User friend = userStorage.getUser(friendId);
-        Set<Long> userFriends = user.getFriends();
+        Map<Long, Boolean> userFriends = user.getFriends();
         if (userFriends == null || userFriends.isEmpty()) return Collections.emptyList();
-        Set<Long> friendFriends = friend.getFriends();
+        Map<Long, Boolean> friendFriends = friend.getFriends();
         if (friendFriends == null || friendFriends.isEmpty()) return Collections.emptyList();
         List<User> mutuals = new ArrayList<>();
-        for (Long id : userFriends) {
-            if (friendFriends.contains(id)) {
+        for (Long id : userFriends.keySet()) {
+            if (friendFriends.containsKey(id)) {
                 mutuals.add(userStorage.getUser(id));
             }
         }
@@ -70,7 +71,7 @@ public class UserService {
 
     public List<User> getFriends(long userId) {
         List<User> friends = new ArrayList<>();
-        for (Long id : userStorage.getUser(userId).getFriends()) {
+        for (Long id : userStorage.getUser(userId).getFriends().keySet()) {
             friends.add(userStorage.getUser(id));
         }
         return friends;

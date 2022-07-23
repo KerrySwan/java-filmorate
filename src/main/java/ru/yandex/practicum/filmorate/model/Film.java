@@ -30,6 +30,10 @@ public class Film extends Entity implements Comparable<Film> {
     @Positive
     private int duration;
 
+    private Genre genre;
+
+    private Rating rating;
+
     @Setter(value = AccessLevel.PRIVATE)
     private Set<Long> likes;
 
