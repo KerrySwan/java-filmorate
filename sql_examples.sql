@@ -1,15 +1,3 @@
-# java-filmorate
-Educational project with using lombok and spring boot
-_________________________
-##Database scheme with relations
-
-![Database](filmorate.jpg)(Database structure)
-_____________
-##SQL business-logic examples using this architecture
-
-[sql_examples link](sql_examples.sql)
-
-```sql
 --Get all users
 select id, name from users
 
@@ -55,4 +43,3 @@ select
   cnt as likes
 from likes_cnt l
 order by cnt desc
-```
