@@ -3,7 +3,7 @@ Educational project with using lombok and spring boot
 _________________________
 ## Database scheme with relations
 
-![Database](filmorate.jpg)(Database structure)
+![Database](filmorate.png)
 _____________
 ## SQL business-logic examples using this architecture
 
