@@ -1,11 +1,11 @@
 # java-filmorate
 Educational project with using lombok and spring boot
 _________________________
-##Database scheme with relations
+## Database scheme with relations
 
 ![Database](filmorate.jpg)(Database structure)
 _____________
-##SQL business-logic examples using this architecture
+## SQL business-logic examples using this architecture
 
 [sql_examples link](sql_examples.sql)
 
