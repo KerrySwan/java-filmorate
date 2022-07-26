@@ -27,19 +27,9 @@ inner join users U
   on F1.friend_id = U.user_id
 
 --Get top 10 popular films
-with likes_cnt as (
-	Select
-	  F.name,
-	  count(L.user_id) as cnt
-	from likes L
-	inner join films F
-	  on F.id = L.film_id
-	group by L.film_id  
-	order by count(L.user_id) desc
-)
-select 
-  row_number(l.cnt) over (partition by l.name order by l.cnt) as place,
-  l.name,
-  cnt as likes
-from likes_cnt l
-order by cnt desc
+SELECT l.film_id,
+       f.name
+FROM likes AS l
+INNER JOIN films AS f ON l.film_id = f.film_id
+GROUP BY film_id
+ORDER BY COUNT(film_id) DESC
