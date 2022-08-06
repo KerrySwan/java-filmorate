@@ -15,9 +15,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Film extends Entity implements Comparable<Film> {
+
+    @Builder
+    public Film(long id, String name, @NonNull String description, @NonNull LocalDate releaseDate, @NonNull int duration, Genre genre, Rating rating, Set<Long> likes) {
+        super(id);
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.genre = genre;
+        this.rating = rating;
+        this.likes = likes;
+    }
 
     @NotBlank
     private final String name;
@@ -28,6 +39,7 @@ public class Film extends Entity implements Comparable<Film> {
     @Past
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate releaseDate;
+
     @NonNull
     @Positive
     private int duration;

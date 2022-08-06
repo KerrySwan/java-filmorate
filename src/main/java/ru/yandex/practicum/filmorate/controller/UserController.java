@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class UserController {
-
 
     final private UserService service;
 

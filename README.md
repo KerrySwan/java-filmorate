@@ -4,6 +4,18 @@ _________________________
 ## Database scheme with relations
 
 ![Database](filmorate.png)
+
+Table friendship suppose to store duplicates like in table bellow.
+It's necessary to not to scan whole table to find specific user friends.
+Also, its simplifies joins.
+In addition, it is never gonna be much of a duplicates because most of the users never gonna befriend 
+each in such quantities to produce pollution with duplicated rows. 
+
+|user_id|friend_id|is_accepted|
+|---|---|---|
+|1|2|t|
+|1|3|t|
+|2|1|t|
 _____________
 ## SQL business-logic examples using this architecture
 

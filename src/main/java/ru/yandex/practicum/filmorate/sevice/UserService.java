@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.sevice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -13,6 +15,8 @@ import java.util.*;
 @Slf4j
 public class UserService {
 
+    @Autowired
+    @Qualifier("inMemoryUserStorage")
     final private UserStorage userStorage;
 
     public Collection<User> getUsers() {

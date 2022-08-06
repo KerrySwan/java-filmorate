@@ -9,15 +9,23 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Data
-@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class User extends Entity {
+
+    @Builder
+    public User(long id, @NotBlank String email, @NotBlank String login, String name, @NonNull LocalDate birthday, Map<Long, Boolean> friends) {
+        super(id);
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+        this.friends = friends;
+    }
+
+
     @Email(message = "E-mail must be declared properly")
     @NotBlank(message = "E-mail must not be empty or blank")
     private String email;
@@ -25,6 +33,7 @@ public class User extends Entity {
     @Pattern(regexp = "\\w+", message = "Login must be declared properly")
     private String login;
     private String name;
+
     @NonNull
     @Past
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
