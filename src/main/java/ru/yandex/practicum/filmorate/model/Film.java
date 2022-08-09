@@ -19,14 +19,14 @@ import java.util.Set;
 public class Film extends Entity implements Comparable<Film> {
 
     @Builder
-    public Film(long id, String name, @NonNull String description, @NonNull LocalDate releaseDate, @NonNull int duration, Genre genre, Rating rating, Set<Long> likes) {
+    public Film(long id, String name, @NonNull String description, @NonNull LocalDate releaseDate, @NonNull int duration, Genre genres, Rating mpa, Set<Long> likes) {
         super(id);
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.genre = genre;
-        this.rating = rating;
+        this.genres = genres;
+        this.mpa = mpa;
         this.likes = likes;
     }
 
@@ -44,9 +44,9 @@ public class Film extends Entity implements Comparable<Film> {
     @Positive
     private int duration;
 
-    private Genre genre;
+    private Rating mpa;
 
-    private Rating rating;
+    private Genre genres;
 
     @Setter(value = AccessLevel.PRIVATE)
     private Set<Long> likes;

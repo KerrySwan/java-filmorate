@@ -3,6 +3,8 @@ Educational project with using lombok and spring boot
 _________________________
 ## Database scheme with relations
 
+//todo переделать картинку
+
 ![Database](filmorate.png)
 
 Table friendship suppose to store duplicates like in table bellow.

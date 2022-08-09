@@ -10,14 +10,17 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 
-@RequiredArgsConstructor
 @Service
 @Slf4j
 public class UserService {
 
     @Autowired
-    @Qualifier("inMemoryUserStorage")
+    @Qualifier("userDbStorage")
     final private UserStorage userStorage;
+
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     public Collection<User> getUsers() {
         return userStorage.getUsers();
@@ -42,6 +45,8 @@ public class UserService {
             boolean isAccepted = friend.getFriends().containsKey(userId);
             user.getFriends().put(friendId, isAccepted);
             friend.getFriends().put(userId, isAccepted);
+            userStorage.putUser(user);
+            userStorage.putUser(user);
             log.info("Users with ids " + userId + " and " + friendId + " befriended.");
         } else {
             log.warn("Impossible to befriend yourself.");
@@ -53,6 +58,8 @@ public class UserService {
         User friend = userStorage.getUser(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
+        userStorage.putUser(user);
+        userStorage.putUser(friend);
         log.info("Users with ids " + userId + " and " + friendId + " are not friends anymore.");
     }
 

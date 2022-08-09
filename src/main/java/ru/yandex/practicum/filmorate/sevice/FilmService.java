@@ -15,13 +15,16 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class FilmService {
 
     @Autowired
-    @Qualifier("inMemoryFilmStorage")
+    @Qualifier("filmDbStorage")
     final private FilmStorage filmStorage;
+
+    public FilmService(@Qualifier("filmDbStorage") final FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
+    }
 
     public Collection<Film> getFilms() {
         return filmStorage.getFilms();
@@ -46,6 +49,7 @@ public class FilmService {
             return;
         }
         film.getLikes().add(userId);
+        filmStorage.putFilm(film);
         log.info("User with id " + userId + " liked film by id " + filmId);
 
     }

@@ -1,11 +1,14 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,7 +18,14 @@ import java.util.Map;
 @Component("userDbStorage")
 public class UserDbStorage implements UserStorage {
 
+    @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private long userId;
+
+    public long getNextId() {
+        return ++userId;
+    }
 
     @Override
     public Collection<User> getUsers() {
@@ -84,8 +94,14 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
+        if (checkForUserExistence(user)) {
+            log.error("User with id: " + user.getId() + " already exists.");
+            throw new EntityAlreadyExistException("User with id: " + user.getId() + " already exists.");
+        }
+        if (!EntityValidator.isUserNameValid(user)) user.setName(user.getLogin());
+        user.setId(getNextId());
         jdbcTemplate.update(
-                "INSERT INTO TABLE users (id, email, login, name, birthday) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO users (id, email, login, name, birthday) VALUES (?, ?, ?, ?, ?)",
                 user.getId(),
                 user.getEmail(),
                 user.getLogin(),
@@ -96,10 +112,11 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-    public void addFriends(User user) {
+    private void addFriends(User user) {
+        if (!EntityValidator.isUserNameValid(user)) user.setName(user.getLogin());
         for (Map.Entry<Long, Boolean> f : user.getFriends().entrySet()) {
             jdbcTemplate.update(
-                    "INSERT INTO TABLE friendship (user_id, friend_id, is_accepted) values (?, ?, ?)",
+                    "INSERT INTO friendship (user_id, friend_id, is_accepted) values (?, ?, ?)",
                     user.getId(),
                     f.getKey(),
                     f.getValue()
@@ -109,15 +126,20 @@ public class UserDbStorage implements UserStorage {
 
     private void removeFriends(User user) {
         jdbcTemplate.update(
-                "DELETE FROM TABLE friendship WHERE user_id = ?",
+                "DELETE FROM friendship WHERE user_id = ?",
                 user.getId()
         );
     }
 
     @Override
     public User putUser(User user) {
+        if (!checkForUserExistence(user)) {
+            log.error("User with id: " + user.getId() + " does not exist.");
+            throw new EntityIsNotFoundException("User with id: " + user.getId() + " does not exist.");
+        }
+        if (!EntityValidator.isUserNameValid(user)) user.setName(user.getLogin());
         jdbcTemplate.update(
-                "UPDATE TABLE users email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
+                "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
                 user.getEmail(),
                 user.getLogin(),
                 user.getName(),
@@ -127,5 +149,13 @@ public class UserDbStorage implements UserStorage {
         removeFriends(user);
         addFriends(user);
         return user;
+    }
+
+    private boolean checkForUserExistence(User user){
+        SqlRowSet row = jdbcTemplate.queryForRowSet("select id from users where id = ?", user.getId());
+        if (row.next()){
+            return row.getLong("id") == user.getId();
+        }
+        return false;
     }
 }

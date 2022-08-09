@@ -1,13 +1,16 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.type.Genre;
 import ru.yandex.practicum.filmorate.model.type.Rating;
+import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,7 +21,14 @@ import java.util.Set;
 @Component("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
 
-    JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private long filmId;
+
+    public long getNextId() {
+        return ++filmId;
+    }
 
     @Override
     public Collection<Film> getFilms() {
@@ -54,7 +64,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void getLikes(Film film) {
-        SqlRowSet likes = jdbcTemplate.queryForRowSet("select film_id, user_id from likes where id = ?", film.getId());
+        SqlRowSet likes = jdbcTemplate.queryForRowSet("select film_id, user_id from likes where film_id = ?", film.getId());
         if (likes.next()) {
             film.getLikes().add(likes.getLong("user_id"));
         }
@@ -71,7 +81,7 @@ public class FilmDbStorage implements FilmStorage {
                     .description(filmsRows.getString("description"))
                     .releaseDate(filmsRows.getDate("release").toLocalDate())
                     .duration(filmsRows.getInt("duration"))
-                    .genre(Genre.valueOf(filmsRows.getString("genre")))
+                    .genres(Genre.getCodeFromGenre(filmsRows.getString("genre")))
                     .rating(Rating.valueOf(filmsRows.getString("rating")))
                     .build();
             getLikes(film);
@@ -83,15 +93,21 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
+        if (checkForFilmExistence(film)) {
+            log.error("Film with id: " + film.getId() + " already exists.");
+            throw new EntityAlreadyExistException("Film with id: " + film.getId() + " already exists.");
+        }
+        EntityValidator.isDateValid(film);
+        film.setId(getNextId());
         jdbcTemplate.update(
-                "INSERT INTO TABLE films (id, name, description, release, duration, genre, rating) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO films (id, name, description, release, duration, genre, rating) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 film.getId(),
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getGenre().toString(),
-                film.getRating().toString()
+                film.getGenre(),
+                Rating.getRating(film.getMpa().getId())
         );
         addLikes(film);
         return film;
@@ -101,7 +117,7 @@ public class FilmDbStorage implements FilmStorage {
         Set<Long> usersId = film.getLikes();
         for (Long id : usersId) {
             jdbcTemplate.update(
-                    "INSERT INTO TABLE likes (film_id, user_id) values (?, ?)",
+                    "INSERT INTO likes (film_id, user_id) values (?, ?)",
                     film.getId(),
                     id
             );
@@ -110,21 +126,26 @@ public class FilmDbStorage implements FilmStorage {
 
     private void removeLikes(Film film) {
         jdbcTemplate.update(
-                "DELETE FROM TABLE likes WHERE film_id = ?",
+                "DELETE FROM likes WHERE film_id = ?",
                 film.getId()
         );
     }
 
     @Override
     public Film putFilm(Film film) {
+        if (!checkForFilmExistence(film)) {
+            log.error("Film with id: " + film.getId() + " does not exist.");
+            throw new EntityIsNotFoundException("Film with id: " + film.getId() + " does not exist.");
+        }
+        EntityValidator.isDateValid(film);
         jdbcTemplate.update(
-                "UPDATE TABLE films name = ?, description = ?, release = ?, duration = ?, genre = ?, rating = ? WHERE id = ?",
+                "UPDATE films SET name = ?, description = ?, release = ?, duration = ?, genre = ?, rating = ? WHERE id = ?",
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getGenre().toString(),
-                film.getRating().toString(),
+                film.getGenre(),
+                Rating.getRating(film.getMpa().getId()),
                 film.getId()
         );
         removeLikes(film);
@@ -132,4 +153,13 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
+    private boolean checkForFilmExistence(Film film) {
+        SqlRowSet row = jdbcTemplate.queryForRowSet("select id from films where id = ?", film.getId());
+        if (row.next()) {
+            return row.getLong("id") == film.getId();
+        }
+        return false;
+    }
+
+    private
 }
