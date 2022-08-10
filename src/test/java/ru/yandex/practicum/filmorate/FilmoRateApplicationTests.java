@@ -44,16 +44,12 @@ class FilmoRateApplicationTests {
                 .description("Simple film desc")
                 .releaseDate(LocalDate.of(2019, 11, 11))
                 .duration(256)
-                .genre(Genre.COMEDY)
-                .rating(Rating.PG)
                 .build();
         secondFilm = Film.builder()
                 .name("Genuine Film")
                 .description("Genuine film desc")
                 .releaseDate(LocalDate.of(1950, 11, 11))
                 .duration(256)
-                .genre(Genre.DRAMA)
-                .rating(Rating.R)
                 .build();
     }
 
@@ -117,8 +113,6 @@ class FilmoRateApplicationTests {
                 .description("Simple film desc")
                 .releaseDate(LocalDate.of(2019, 11, 11))
                 .duration(256)
-                .genre(Genre.COMEDY)
-                .rating(Rating.PG)
                 .build();
         filmStorage.putFilm(film);
         Film filmUpdated = filmStorage.getFilm(1);

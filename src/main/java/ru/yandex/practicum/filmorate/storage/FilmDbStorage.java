@@ -12,10 +12,7 @@ import ru.yandex.practicum.filmorate.model.type.Genre;
 import ru.yandex.practicum.filmorate.model.type.Rating;
 import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Component("filmDbStorage")
@@ -33,7 +30,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getFilms() {
         Map<Long, Film> films = new HashMap<>();
-        SqlRowSet filmsRows = jdbcTemplate.queryForRowSet("select id, name, description, release, duration, genre, rating from films");
+        SqlRowSet filmsRows = jdbcTemplate.queryForRowSet("select id, name, description, release, duration, rating_id from films");
         while (filmsRows.next()) {
             long film_id = filmsRows.getLong("id");
             Film film = Film.builder()
@@ -42,8 +39,8 @@ public class FilmDbStorage implements FilmStorage {
                     .description(filmsRows.getString("description"))
                     .releaseDate(filmsRows.getDate("release").toLocalDate())
                     .duration(filmsRows.getInt("duration"))
-                    .genre(Genre.valueOf(filmsRows.getString("genre")))
-                    .rating(Rating.valueOf(filmsRows.getString("rating")))
+                    .genres(getGenres(film_id))
+                    .mpa(new Rating(filmsRows.getLong("rating_id")))
                     .build();
             films.put(film_id, film);
         }
@@ -73,7 +70,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getFilm(long id) {
         SqlRowSet filmsRows =
-                jdbcTemplate.queryForRowSet("select id, name, description, release, duration, genre, rating from films where id = ?", id);
+                jdbcTemplate.queryForRowSet("select id, name, description, release, duration, rating_id from films where id = ?", id);
         if (filmsRows.next()) {
             Film film = Film.builder()
                     .id(filmsRows.getLong("id"))
@@ -81,14 +78,24 @@ public class FilmDbStorage implements FilmStorage {
                     .description(filmsRows.getString("description"))
                     .releaseDate(filmsRows.getDate("release").toLocalDate())
                     .duration(filmsRows.getInt("duration"))
-                    .genres(Genre.getCodeFromGenre(filmsRows.getString("genre")))
-                    .rating(Rating.valueOf(filmsRows.getString("rating")))
+                    .genres(getGenres(filmsRows.getLong("id")))
+                    .mpa(new Rating(filmsRows.getLong("rating_id")))
                     .build();
             getLikes(film);
             return film;
         }
         log.error("Film with id: " + id + " does not exist.");
         throw new EntityIsNotFoundException("Film with id: " + id + " does not exist.");
+    }
+
+    private List<Genre> getGenres(long id){
+        SqlRowSet genreRows =
+                jdbcTemplate.queryForRowSet("select film_id, genre_id from filmGenres where film_id = ?", id);
+        List<Genre> genres = new ArrayList<>();
+        while(genreRows.next()){
+            genres.add(new Genre(genreRows.getLong("genre_id")));
+        }
+        return genres;
     }
 
     @Override
@@ -100,17 +107,31 @@ public class FilmDbStorage implements FilmStorage {
         EntityValidator.isDateValid(film);
         film.setId(getNextId());
         jdbcTemplate.update(
-                "INSERT INTO films (id, name, description, release, duration, genre, rating) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO films (id, name, description, release, duration, rating_id) VALUES (?, ?, ?, ?, ?, ?)",
                 film.getId(),
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getGenre(),
-                Rating.getRating(film.getMpa().getId())
+                film.getMpa()
         );
+        updateGenreForFilm(film);
         addLikes(film);
         return film;
+    }
+
+    private void updateGenreForFilm(Film film){
+        jdbcTemplate.update(
+                "DELETE FROM filmGenres where film_id = ?",
+                film.getId()
+        );
+        for (Genre genre : film.getGenres()) {
+            jdbcTemplate.update(
+                    "INSERT INTO filmGenres (film_id, genre_id) VALUES (?, ?)",
+                    film.getId(),
+                    genre.getId()
+            );
+        }
     }
 
     private void addLikes(Film film) {
@@ -139,15 +160,15 @@ public class FilmDbStorage implements FilmStorage {
         }
         EntityValidator.isDateValid(film);
         jdbcTemplate.update(
-                "UPDATE films SET name = ?, description = ?, release = ?, duration = ?, genre = ?, rating = ? WHERE id = ?",
+                "UPDATE films SET name = ?, description = ?, release = ?, duration = ?, rating_id = ? WHERE id = ?",
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getGenre(),
-                Rating.getRating(film.getMpa().getId()),
+                film.getMpa().getId(),
                 film.getId()
         );
+        updateGenreForFilm(film);
         removeLikes(film);
         addLikes(film);
         return film;
@@ -161,5 +182,4 @@ public class FilmDbStorage implements FilmStorage {
         return false;
     }
 
-    private
 }

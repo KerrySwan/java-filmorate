@@ -12,6 +12,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,7 +20,7 @@ import java.util.Set;
 public class Film extends Entity implements Comparable<Film> {
 
     @Builder
-    public Film(long id, String name, @NonNull String description, @NonNull LocalDate releaseDate, @NonNull int duration, Genre genres, Rating mpa, Set<Long> likes) {
+    public Film(long id, String name, @NonNull String description, @NonNull LocalDate releaseDate, @NonNull int duration, List<Genre> genres, Rating mpa, Set<Long> likes) {
         super(id);
         this.name = name;
         this.description = description;
@@ -46,7 +47,7 @@ public class Film extends Entity implements Comparable<Film> {
 
     private Rating mpa;
 
-    private Genre genres;
+    private List<Genre> genres;
 
     @Setter(value = AccessLevel.PRIVATE)
     private Set<Long> likes;

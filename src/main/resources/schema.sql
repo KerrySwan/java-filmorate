@@ -1,9 +1,5 @@
 DROP ALL OBJECTS;
 
-CREATE TYPE IF NOT EXISTS GENRE as ENUM('COMEDY','DRAMA','CARTOON','THRILLER','DOCUMENTARY','ACTION');
-
-CREATE TYPE IF NOT EXISTS RATING as ENUM('G','PG','PG_13','R','NC_17');
-
 CREATE TABLE IF NOT EXISTS users(
 	id bigint PRIMARY KEY,
 	email varchar(255),
@@ -18,13 +14,13 @@ CREATE TABLE IF NOT EXISTS films(
 	description varchar(255),
 	release date,
 	duration integer,
-	rating RATING
+	rating_id bigint
 );
 
-CREATE TABLE IF NOT EXISTS genresToFilm(
-    film_id INTEGER,
-    genre GENRE
-)
+CREATE TABLE IF NOT EXISTS filmGenres(
+    film_id bigint,
+    genre_id bigint
+);
 
 CREATE TABLE IF NOT EXISTS friendship(
 	user_id bigint,
@@ -35,4 +31,14 @@ CREATE TABLE IF NOT EXISTS friendship(
 CREATE TABLE IF NOT EXISTS likes(
 	film_id bigint ,
 	user_id bigint
+);
+
+CREATE TABLE IF NOT EXISTS genres(
+  id bigint,
+  genre varchar(255)
+);
+
+CREATE TABLE IF NOT EXISTS ratings(
+  id bigint,
+  rating varchar(255)
 );
