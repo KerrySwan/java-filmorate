@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -67,4 +64,19 @@ public class FilmService {
                 .collect(Collectors.toSet());
     }
 
+    public List<Film.Rating> getMpa(){
+        return filmStorage.getMpas();
+    }
+
+    public Film.Rating getMpa(long id){
+        return filmStorage.getMpa(id);
+    }
+
+    public List<Film.Genre> getGenres(){
+        return filmStorage.getGenres();
+    }
+
+    public Film.Genre getGenre(long id){
+        return filmStorage.getGenre(id);
+    }
 }

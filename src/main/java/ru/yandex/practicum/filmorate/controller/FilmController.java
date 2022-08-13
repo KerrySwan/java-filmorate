@@ -60,4 +60,24 @@ public class FilmController {
         return service.getOrderedSet(count);
     }
 
+    @GetMapping(value = "/mpa")
+    public List<Film.Rating> getMpa(){
+        return service.getMpa();
+    }
+
+    @GetMapping(value = "/mpa/{id}")
+    public Film.Rating getMpa(@PathVariable @Positive long id){
+        return service.getMpa(id);
+    }
+
+    @GetMapping(value = "/genres")
+    public List<Film.Genre> getGenres(){
+        return service.getGenres();
+    }
+
+    @GetMapping(value = "/genres/{id}")
+    public Film.Genre getGenre(@PathVariable @Positive long id){
+        return service.getGenre(id);
+    }
+
 }

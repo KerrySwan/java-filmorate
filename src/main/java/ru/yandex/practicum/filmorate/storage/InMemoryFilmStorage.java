@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Component("inMemoryFilmStorage")
@@ -57,5 +58,26 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         return film;
     }
+
+    @Override
+    public Film.Rating getMpa(long id) {
+        return null;
+    }
+
+    @Override
+    public List<Film.Rating> getMpas() {
+        return null;
+    }
+
+    @Override
+    public List<Film.Genre> getGenres() {
+        return null;
+    }
+
+    @Override
+    public Film.Genre getGenre(long id) {
+        return null;
+    }
+
 
 }

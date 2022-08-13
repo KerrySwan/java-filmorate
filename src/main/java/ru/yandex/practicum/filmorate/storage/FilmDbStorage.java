@@ -7,9 +7,10 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.type.Genre;
-import ru.yandex.practicum.filmorate.model.type.Rating;
+import ru.yandex.practicum.filmorate.model.Film.Genre;
+import ru.yandex.practicum.filmorate.model.Film.Rating;
 import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import java.util.*;
@@ -24,13 +25,21 @@ public class FilmDbStorage implements FilmStorage {
     private long filmId;
 
     public long getNextId() {
-        return ++filmId;
+        log.error("chaned id = " + filmId);
+        SqlRowSet filmIds = jdbcTemplate.queryForRowSet("select id from films");
+        List<Long> idList = new ArrayList<>();
+        while(filmIds.next()){
+            idList.add(filmIds.getLong("id"));
+        }
+        long id = Entity.findMissingId(idList, filmId);
+        return id == -1 ? ++filmId : id;
     }
 
     @Override
     public Collection<Film> getFilms() {
         Map<Long, Film> films = new HashMap<>();
         SqlRowSet filmsRows = jdbcTemplate.queryForRowSet("select id, name, description, release, duration, rating_id from films");
+
         while (filmsRows.next()) {
             long film_id = filmsRows.getLong("id");
             Film film = Film.builder()
@@ -39,8 +48,8 @@ public class FilmDbStorage implements FilmStorage {
                     .description(filmsRows.getString("description"))
                     .releaseDate(filmsRows.getDate("release").toLocalDate())
                     .duration(filmsRows.getInt("duration"))
-                    .genres(getGenres(film_id))
-                    .mpa(new Rating(filmsRows.getLong("rating_id")))
+                    .genres(getGenresForFilm(film_id))
+                    .mpa(getMpaForFilm(filmsRows.getLong("rating_id")))
                     .build();
             films.put(film_id, film);
         }
@@ -78,8 +87,8 @@ public class FilmDbStorage implements FilmStorage {
                     .description(filmsRows.getString("description"))
                     .releaseDate(filmsRows.getDate("release").toLocalDate())
                     .duration(filmsRows.getInt("duration"))
-                    .genres(getGenres(filmsRows.getLong("id")))
-                    .mpa(new Rating(filmsRows.getLong("rating_id")))
+                    .genres(getGenresForFilm(filmsRows.getLong("id")))
+                    .mpa(getMpaForFilm(filmsRows.getLong("rating_id")))
                     .build();
             getLikes(film);
             return film;
@@ -88,23 +97,34 @@ public class FilmDbStorage implements FilmStorage {
         throw new EntityIsNotFoundException("Film with id: " + id + " does not exist.");
     }
 
-    private List<Genre> getGenres(long id){
+    private Set<Genre> getGenresForFilm(long filmId){
+        String sql = "select f.genre_id, g.genre from filmGenres f " +
+                      "inner join genres g on f.genre_id = g.id " +
+                      "where film_id = ?";
         SqlRowSet genreRows =
-                jdbcTemplate.queryForRowSet("select film_id, genre_id from filmGenres where film_id = ?", id);
-        List<Genre> genres = new ArrayList<>();
+                jdbcTemplate.queryForRowSet(sql, filmId);
+        Set<Genre> genres = new TreeSet<>();
         while(genreRows.next()){
-            genres.add(new Genre(genreRows.getLong("genre_id")));
+            genres.add(new Genre(genreRows.getLong("genre_id"), genreRows.getString("genre")));
         }
         return genres;
     }
 
+    public Rating getMpaForFilm(long ratingId){
+        SqlRowSet ratingRows =
+                jdbcTemplate.queryForRowSet("select id, rating from ratings where id = ?", ratingId);
+        if(ratingRows.next()){
+            return new Rating(ratingRows.getLong("id"), ratingRows.getString("rating"));
+        }
+        return null;
+    }
     @Override
     public Film addFilm(Film film) {
         if (checkForFilmExistence(film)) {
             log.error("Film with id: " + film.getId() + " already exists.");
             throw new EntityAlreadyExistException("Film with id: " + film.getId() + " already exists.");
         }
-        EntityValidator.isDateValid(film);
+        EntityValidator.isFilmValid(film);
         film.setId(getNextId());
         jdbcTemplate.update(
                 "INSERT INTO films (id, name, description, release, duration, rating_id) VALUES (?, ?, ?, ?, ?, ?)",
@@ -113,7 +133,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpa()
+                film.getMpa().getId().orElse(null)
         );
         updateGenreForFilm(film);
         addLikes(film);
@@ -125,11 +145,12 @@ public class FilmDbStorage implements FilmStorage {
                 "DELETE FROM filmGenres where film_id = ?",
                 film.getId()
         );
+        Set<Genre> genres = film.getGenres();
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(
                     "INSERT INTO filmGenres (film_id, genre_id) VALUES (?, ?)",
                     film.getId(),
-                    genre.getId()
+                    genre.getId().orElse(null)
             );
         }
     }
@@ -158,14 +179,14 @@ public class FilmDbStorage implements FilmStorage {
             log.error("Film with id: " + film.getId() + " does not exist.");
             throw new EntityIsNotFoundException("Film with id: " + film.getId() + " does not exist.");
         }
-        EntityValidator.isDateValid(film);
+        EntityValidator.isFilmValid(film);
         jdbcTemplate.update(
                 "UPDATE films SET name = ?, description = ?, release = ?, duration = ?, rating_id = ? WHERE id = ?",
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
-                film.getMpa().getId(),
+                film.getMpa().getId().orElse(null),
                 film.getId()
         );
         updateGenreForFilm(film);
@@ -174,12 +195,62 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
+
+
+
     private boolean checkForFilmExistence(Film film) {
         SqlRowSet row = jdbcTemplate.queryForRowSet("select id from films where id = ?", film.getId());
         if (row.next()) {
             return row.getLong("id") == film.getId();
         }
         return false;
+    }
+
+    public List<Genre> getGenres(){
+        String sql = "select id, genre from genres";
+        SqlRowSet genreRows =
+                jdbcTemplate.queryForRowSet(sql);
+        List<Genre> genres = new ArrayList<>();
+        while(genreRows.next()){
+            genres.add(new Genre(genreRows.getLong("id"), genreRows.getString("genre")));
+        }
+        return genres;
+    }
+
+
+
+    @Override
+    public Genre getGenre(long genreId){
+        String sql = "select id, genre from genres g where id = ?";
+        SqlRowSet genreRows =
+                jdbcTemplate.queryForRowSet(sql, genreId);
+        if(genreRows.next()){
+            return new Genre(genreRows.getLong("id"), genreRows.getString("genre"));
+        }
+        return null;
+    }
+
+    @Override
+    public List<Rating> getMpas() {
+        String sql = "select id, rating from ratings";
+        SqlRowSet ratingRows =
+                jdbcTemplate.queryForRowSet(sql);
+        List<Rating> ratings = new ArrayList<>();
+        while(ratingRows.next()){
+            ratings.add(new Rating(ratingRows.getLong("id"), ratingRows.getString("rating")));
+        }
+        return ratings;
+    }
+
+    @Override
+    public Rating getMpa(long id) {
+        String sql = "select id, rating from ratings where id = ?";
+        SqlRowSet ratingRows =
+                jdbcTemplate.queryForRowSet(sql, id);
+        if(ratingRows.next()){
+            return new Rating(ratingRows.getLong("id"), ratingRows.getString("rating"));
+        }
+        return null;
     }
 
 }

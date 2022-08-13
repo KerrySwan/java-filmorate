@@ -7,12 +7,11 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.model.Entity;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component("userDbStorage")
@@ -24,7 +23,13 @@ public class UserDbStorage implements UserStorage {
     private long userId;
 
     public long getNextId() {
-        return ++userId;
+        SqlRowSet userIds = jdbcTemplate.queryForRowSet("select id from users");
+        List<Long> idList = new ArrayList<>();
+        while(userIds.next()){
+            idList.add(userIds.getLong("id"));
+        }
+        long id = Entity.findMissingId(idList, userId);
+        return id == -1 ? ++userId : id;
     }
 
     @Override
