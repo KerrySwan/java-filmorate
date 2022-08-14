@@ -3,7 +3,6 @@ Educational project with using lombok and spring boot
 _________________________
 ## Database scheme with relations
 
-//todo переделать картинку
 
 ![Database](filmorate.png)
 

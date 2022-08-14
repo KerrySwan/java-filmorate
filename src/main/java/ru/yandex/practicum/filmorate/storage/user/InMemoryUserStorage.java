@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,9 +8,10 @@ import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Slf4j
-@Component("inMemoryUserStorage")
+@Component
 public class InMemoryUserStorage implements UserStorage {
 
     private HashMap<Long, User> users = new HashMap<>();
@@ -39,7 +40,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         if (!EntityValidator.isUserNameValid(user)) user.setName(user.getLogin());
-        user.setId(getNextId());
+        user.setId(Optional.of(getNextId()));
         users.put(user.getId(), user);
         log.info(user + " added to memory");
         return user;

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,10 +8,10 @@ import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Optional;
 
 @Slf4j
-@Component("inMemoryFilmStorage")
+@Component
 public class InMemoryFilmStorage implements FilmStorage {
 
     private HashMap<Long, Film> films = new HashMap<>();
@@ -40,7 +40,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         EntityValidator.isDateValid(film);
-        film.setId(getNextId());
+        film.setId(Optional.of(getNextId()));
         films.put(film.getId(), film);
         log.info(film + " added to memory");
         return film;
@@ -57,26 +57,6 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new EntityIsNotFoundException("Film with id: " + film.getId() + " does not exist.");
         }
         return film;
-    }
-
-    @Override
-    public Film.Rating getMpa(long id) {
-        return null;
-    }
-
-    @Override
-    public List<Film.Rating> getMpas() {
-        return null;
-    }
-
-    @Override
-    public List<Film.Genre> getGenres() {
-        return null;
-    }
-
-    @Override
-    public Film.Genre getGenre(long id) {
-        return null;
     }
 
 

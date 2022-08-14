@@ -9,7 +9,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -17,7 +19,7 @@ public class User extends Entity {
 
     @Builder
     public User(long id, @NotBlank String email, @NotBlank String login, String name, @NonNull LocalDate birthday, Map<Long, Boolean> friends) {
-        super(id);
+        super(Optional.of(id));
         this.email = email;
         this.login = login;
         this.name = name;

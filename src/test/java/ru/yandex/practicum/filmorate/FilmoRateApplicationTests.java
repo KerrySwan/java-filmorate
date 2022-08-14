@@ -6,12 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -25,8 +29,12 @@ class FilmoRateApplicationTests {
     private Film firstFilm;
     private Film secondFilm;
 
+    private Set<Genre> genres;
 
     {
+        genres = new HashSet<>(){{
+            add(new Genre(1, "G"));
+        }};
         firstUser = User.builder()
                 .name("john")
                 .login("john_1337")
@@ -44,12 +52,16 @@ class FilmoRateApplicationTests {
                 .description("Simple film desc")
                 .releaseDate(LocalDate.of(2019, 11, 11))
                 .duration(256)
+                .mpa(new Mpa(1, "Комедия"))
+                .genres(genres)
                 .build();
         secondFilm = Film.builder()
                 .name("Genuine Film")
                 .description("Genuine film desc")
                 .releaseDate(LocalDate.of(1950, 11, 11))
                 .duration(256)
+                .mpa(new Mpa(1, "Комедия"))
+                .genres(genres)
                 .build();
     }
 
@@ -113,6 +125,8 @@ class FilmoRateApplicationTests {
                 .description("Simple film desc")
                 .releaseDate(LocalDate.of(2019, 11, 11))
                 .duration(256)
+                .mpa(new Mpa(1, "Комедия"))
+                .genres(genres)
                 .build();
         filmStorage.putFilm(film);
         Film filmUpdated = filmStorage.getFilm(1);

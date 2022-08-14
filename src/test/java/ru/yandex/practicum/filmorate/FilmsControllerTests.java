@@ -17,7 +17,7 @@ class FilmsControllerTests {
 
     @Test
     void shouldProcessUsualRequest() {
-        String body = "{\"name\":\"film\",\"description\":\"film\",\"releaseDate\":\"1999-11-11\",\"duration\":100}";
+        String body = "{\"name\":\"film\",\"description\":\"film\",\"mpa\": { \"id\": 3},  \"genres\": [{ \"id\": 1}], \"releaseDate\":\"1999-11-11\",\"duration\":100}";
         HttpResponse<String> res = HttpFlimorateClient.sendPostRequest(url + "/films", body);
         Assertions.assertEquals(200, res.statusCode());
     }
