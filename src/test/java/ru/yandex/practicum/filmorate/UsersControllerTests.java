@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.net.http.HttpResponse;
 
 @SpringBootTest
+@AutoConfigureTestDatabase
 class UsersControllerTests {
 
     private final static int port = 8080;

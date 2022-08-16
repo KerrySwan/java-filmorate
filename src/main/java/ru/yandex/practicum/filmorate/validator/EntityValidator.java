@@ -42,4 +42,16 @@ public class EntityValidator {
         } else log.info("Release date is valid");
     }
 
+    public static void isMpaValid(Film film) {
+        if (film.getMpa().getId() <= 0) {
+            EntityIsNotValidException e = new EntityIsNotValidException("MPA is invalid.");
+            log.error("MPA is invalid.. Film's id:" + film.getId());
+            throw e;
+        } else log.info("MPA is valid");
+    }
+
+    public static void isFilmValid(Film film){
+        isDateValid(film);
+        isMpaValid(film);
+    }
 }

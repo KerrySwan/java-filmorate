@@ -21,6 +21,11 @@ public class ValidationExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(EntityAlreadyExistException.class)
+    protected ResponseEntity<?> handleIdViolatedError(EntityAlreadyExistException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<?> handleIdViolatedError(ConstraintViolationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);

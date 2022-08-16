@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -57,5 +58,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         return film;
     }
+
 
 }

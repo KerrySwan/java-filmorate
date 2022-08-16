@@ -6,13 +6,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.sevice.FilmService;
-import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -43,15 +40,6 @@ public class FilmController {
         return service.putFilm(film);
     }
 
-    @PutMapping(value = "/films/{id}/like/{userId}")
-    public void addLike(@PathVariable(name = "id") @Positive long filmId, @PathVariable @Positive long userId) {
-        service.addLike(filmId, userId);
-    }
-
-    @DeleteMapping(value = "/films/{id}/like/{userId}")
-    public void removeLike(@PathVariable(name = "id") @Positive long filmId, @PathVariable @Positive long userId) {
-        service.removeLike(filmId, userId);
-    }
 
     @GetMapping(value = "/films/popular")
     public Set<Film> getPopular(@RequestParam(required = false, defaultValue = "10") @Positive int count) {
