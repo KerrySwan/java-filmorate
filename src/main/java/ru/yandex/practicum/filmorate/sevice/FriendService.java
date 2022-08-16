@@ -16,11 +16,10 @@ import java.util.Map;
 @Slf4j
 public class FriendService {
 
-    @Autowired
-    @Qualifier("userDbStorage")
     UserStorage userStorage;
 
-    public FriendService(@Autowired @Qualifier("userDbStorage")UserStorage userStorage) {
+    @Autowired
+    public FriendService(@Qualifier("userDbStorage")UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 

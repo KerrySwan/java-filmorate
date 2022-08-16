@@ -13,10 +13,10 @@ import java.util.Map;
 public class FriendDbStorage implements FriendStorage {
 
 
-    @Autowired
     JdbcTemplate jdbcTemplate;
 
-    public FriendDbStorage(@Autowired JdbcTemplate jdbcTemplate) {
+    @Autowired
+    public FriendDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

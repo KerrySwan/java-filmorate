@@ -12,10 +12,11 @@ import java.util.Set;
 @Component
 public class LikeDbStorage implements LikeStorage {
 
-    @Autowired
+
     JdbcTemplate jdbcTemplate;
 
-    public LikeDbStorage(@Autowired JdbcTemplate jdbcTemplate) {
+    @Autowired
+    public LikeDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

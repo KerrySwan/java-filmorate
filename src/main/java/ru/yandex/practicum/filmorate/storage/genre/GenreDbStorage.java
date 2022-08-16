@@ -15,10 +15,11 @@ import java.util.TreeSet;
 @Component
 public class GenreDbStorage implements GenreStorage {
 
-    @Autowired
+
     private JdbcTemplate jdbcTemplate;
 
-    public GenreDbStorage(@Autowired JdbcTemplate jdbcTemplate) {
+    @Autowired
+    public GenreDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

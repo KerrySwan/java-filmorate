@@ -15,11 +15,11 @@ import java.util.Optional;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class User extends Entity {
+public class User {
 
     @Builder
     public User(long id, @NotBlank String email, @NotBlank String login, String name, @NonNull LocalDate birthday, Map<Long, Boolean> friends) {
-        super(Optional.of(id));
+        this.id = id;
         this.email = email;
         this.login = login;
         this.name = name;
@@ -27,6 +27,7 @@ public class User extends Entity {
         this.friends = friends;
     }
 
+    protected long id;
 
     @Email(message = "E-mail must be declared properly")
     @NotBlank(message = "E-mail must not be empty or blank")
@@ -59,7 +60,7 @@ public class User extends Entity {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + super.getId() +
+                "id=" + id +
                 ", email='" + email + '\'' +
                 ", login='" + login + '\'' +
                 '}';

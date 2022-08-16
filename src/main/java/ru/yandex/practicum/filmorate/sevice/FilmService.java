@@ -16,11 +16,10 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
 
-    @Autowired
-    @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
 
-    public FilmService(@Autowired @Qualifier("filmDbStorage") final FilmStorage filmStorage) {
+    @Autowired
+    public FilmService(@Qualifier("filmDbStorage") final FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 

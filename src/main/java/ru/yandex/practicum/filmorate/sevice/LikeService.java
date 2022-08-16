@@ -11,11 +11,10 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 @Service
 public class LikeService {
 
-    @Autowired
-    @Qualifier("filmDbStorage")
     final private FilmStorage filmStorage;
 
-    public LikeService(@Autowired @Qualifier("filmDbStorage") final FilmStorage filmStorage) {
+    @Autowired
+    public LikeService(@Qualifier("filmDbStorage") final FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 

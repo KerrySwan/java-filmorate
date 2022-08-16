@@ -13,11 +13,11 @@ import java.util.Collection;
 @Slf4j
 public class UserService {
 
-    @Autowired
     @Qualifier("userDbStorage")
     final private UserStorage userStorage;
 
-    public UserService(@Autowired @Qualifier("userDbStorage") UserStorage userStorage) {
+    @Autowired
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 

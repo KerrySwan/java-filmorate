@@ -13,11 +13,10 @@ import java.util.List;
 @Service
 public class MpaService {
 
-    @Autowired
-    @Qualifier("mpaDbStorage")
     private final MpaStorage mpaStorage;
 
-    public MpaService(@Autowired @Qualifier("mpaDbStorage") final MpaStorage mpaStorage) {
+    @Autowired
+    public MpaService(final MpaStorage mpaStorage) {
         this.mpaStorage = mpaStorage;
     }
 

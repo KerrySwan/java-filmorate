@@ -40,7 +40,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         EntityValidator.isDateValid(film);
-        film.setId(Optional.of(getNextId()));
+        film.setId(getNextId());
         films.put(film.getId(), film);
         log.info(film + " added to memory");
         return film;

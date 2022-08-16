@@ -12,10 +12,10 @@ import java.util.List;
 @Component
 public class MpaDbStorage implements MpaStorage {
 
-    @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public MpaDbStorage(@Autowired JdbcTemplate jdbcTemplate) {
+    @Autowired
+    public MpaDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

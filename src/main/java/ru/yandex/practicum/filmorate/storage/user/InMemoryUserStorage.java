@@ -40,7 +40,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         if (!EntityValidator.isUserNameValid(user)) user.setName(user.getLogin());
-        user.setId(Optional.of(getNextId()));
+        user.setId(getNextId());
         users.put(user.getId(), user);
         log.info(user + " added to memory");
         return user;

@@ -4,6 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
@@ -12,6 +16,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
 import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
+import java.sql.PreparedStatement;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,15 +27,14 @@ import java.util.Optional;
 @Component
 public class UserDbStorage implements UserStorage {
 
-    @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired @Qualifier("friendDbStorage")
     FriendStorage friendStorage;
 
     private long userId;
 
-    public UserDbStorage(@Autowired JdbcTemplate jdbcTemplate, @Autowired @Qualifier("friendDbStorage") FriendStorage friendStorage) {
+    @Autowired
+    public UserDbStorage(JdbcTemplate jdbcTemplate,FriendStorage friendStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.friendStorage = friendStorage;
     }
@@ -80,16 +85,23 @@ public class UserDbStorage implements UserStorage {
             throw new EntityAlreadyExistException("User with id: " + user.getId() + " already exists.");
         }
         if (!EntityValidator.isUserNameValid(user)) user.setName(user.getLogin());
-        jdbcTemplate.update(
-                "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)",
-                user.getEmail(),
-                user.getLogin(),
-                user.getName(),
-                user.getBirthday()
+
+        String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
+        Object[] types = new Object[]{user.getEmail(), user.getLogin(), user.getName(), user.getBirthday().toString()};
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        PreparedStatementCreatorFactory preparedStatementCreatorFactory = new PreparedStatementCreatorFactory(
+                sql,
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR
         );
-        user.setId(Optional.of(getLastId()));
+        preparedStatementCreatorFactory.setReturnGeneratedKeys(true);
+        PreparedStatementCreator ps = preparedStatementCreatorFactory.newPreparedStatementCreator(types);
+        jdbcTemplate.update(ps, keyHolder);
+        long id = (long) keyHolder.getKey();
+
+        user.setId(id);
         friendStorage.addFriends(user);
-        return getUser(getLastId());
+        return user;
     }
 
     @Override
@@ -120,11 +132,4 @@ public class UserDbStorage implements UserStorage {
         return false;
     }
 
-    private long getLastId(){
-        SqlRowSet row = jdbcTemplate.queryForRowSet("select max(id) as id from users");
-        if (row.next()) {
-            return row.getLong("id");
-        }
-        return -1;
-    }
 }

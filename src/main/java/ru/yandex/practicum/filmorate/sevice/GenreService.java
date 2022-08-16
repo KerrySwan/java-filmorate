@@ -13,11 +13,10 @@ import java.util.List;
 @Service
 public class GenreService {
 
-    @Autowired
-    @Qualifier("genreDbStorage")
     private final GenreStorage genreStorage;
 
-    public GenreService(@Autowired @Qualifier("genreDbStorage") final GenreStorage genreStorage) {
+    @Autowired
+    public GenreService(final GenreStorage genreStorage) {
         this.genreStorage = genreStorage;
     }
 

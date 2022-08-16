@@ -4,6 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
@@ -14,6 +18,8 @@ import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.validator.EntityValidator;
 
+import java.sql.PreparedStatement;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,19 +29,16 @@ import java.util.Optional;
 @Component
 public class FilmDbStorage implements FilmStorage {
 
-    @Autowired
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired @Qualifier("genreDbStorage")
     private GenreStorage genreStorage;
 
-    @Autowired @Qualifier("mpaDbStorage")
     private MpaStorage mpaStorage;
 
-    @Autowired @Qualifier("likeDbStorage")
     private LikeStorage likeStorage;
 
-    public FilmDbStorage(@Autowired JdbcTemplate jdbcTemplate, @Autowired @Qualifier("genreDbStorage") GenreStorage genreStorage, @Autowired @Qualifier("mpaDbStorage") MpaStorage mpaStorage, @Autowired @Qualifier("likeDbStorage") LikeStorage likeStorage) {
+    @Autowired
+    public FilmDbStorage( JdbcTemplate jdbcTemplate, GenreStorage genreStorage, MpaStorage mpaStorage, LikeStorage likeStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
@@ -93,20 +96,25 @@ public class FilmDbStorage implements FilmStorage {
             log.error("Film with id: " + film.getId() + " already exists.");
             throw new EntityAlreadyExistException("Film with id: " + film.getId() + " already exists.");
         }
-        EntityValidator.isFilmValid(film);
-        jdbcTemplate.update(
-                "INSERT INTO films (name, description, release, duration, rating_id) VALUES (?, ?, ?, ?, ?)",
-                film.getName(),
-                film.getDescription(),
-                film.getReleaseDate(),
-                film.getDuration(),
-                film.getMpa().getId()
+
+        String sql = "INSERT INTO films (name, description, release, duration, rating_id) VALUES (?, ?, ?, ?, ?)";
+        Object[] types = new Object[]{film.getName(), film.getDescription(), film.getReleaseDate().toString(),
+                                      film.getDuration(), film.getMpa().getId()};
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        PreparedStatementCreatorFactory preparedStatementCreatorFactory = new PreparedStatementCreatorFactory(
+                sql,
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.BIGINT
         );
-        film.setId(Optional.of(getLastId()));
+        preparedStatementCreatorFactory.setReturnGeneratedKeys(true);
+        PreparedStatementCreator ps = preparedStatementCreatorFactory.newPreparedStatementCreator(types);
+        jdbcTemplate.update(ps, keyHolder);
+        long id = (long) keyHolder.getKey();
+
+        film.setId(id);
         genreStorage.updateGenreForFilm(film);
         likeStorage.addLikes(film);
-        Film createdFilm = getFilm(getLastId());
-        return createdFilm;
+        return film;
     }
 
 
@@ -139,12 +147,5 @@ public class FilmDbStorage implements FilmStorage {
         return false;
     }
 
-    private long getLastId(){
-        SqlRowSet row = jdbcTemplate.queryForRowSet("select max(id) as id from films");
-        if (row.next()) {
-            return row.getLong("id");
-        }
-        return -1;
-    }
 
 }

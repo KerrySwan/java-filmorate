@@ -1,23 +1,27 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.beans.ConstructorProperties;
 import java.util.Objects;
 import java.util.Optional;
 
 @Getter
-public class Genre extends Entity implements Comparable {
+@Setter
+public class Genre implements Comparable {
+
+    protected long id;
 
     private Optional<String> name;
 
     @ConstructorProperties("id")
     public Genre(long id) {
-        super.id = Optional.of(id);
+        this.id = id;
     }
 
     public Genre(long id, String name) {
-        this.id = Optional.of(id);
+        this.id = id;
         this.name = Optional.of(name);
     }
 
@@ -37,6 +41,6 @@ public class Genre extends Entity implements Comparable {
     @Override
     public int compareTo(Object o) {
         Genre genre = (Genre) o;
-        return (int) (this.id.orElse(0L) - genre.getId());
+        return (int) (this.id - genre.getId());
     }
 }

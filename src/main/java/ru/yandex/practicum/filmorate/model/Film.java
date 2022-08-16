@@ -14,12 +14,12 @@ import java.util.*;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Film extends Entity implements Comparable<Film> {
+public class Film implements Comparable<Film> {
 
     @Builder
     @ConstructorProperties({"id", "name", "description", "releaseDate", "duration", "rate", "genres", "mpa", "likes"})
     public Film(long id, String name, @NonNull String description, @NonNull LocalDate releaseDate, @NonNull int duration, int rate, Set<Genre> genres, Mpa mpa, Set<Long> likes) {
-        super(Optional.of(id));
+        this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
@@ -29,6 +29,8 @@ public class Film extends Entity implements Comparable<Film> {
         this.mpa = mpa;
         this.likes = likes;
     }
+
+    protected long id;
 
     @NotBlank
     private final String name;
@@ -62,7 +64,7 @@ public class Film extends Entity implements Comparable<Film> {
     @Override
     public String toString() {
         return "Film{" +
-                "id=" + super.getId() +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", releaseDate=" + releaseDate +
                 ", duration=" + duration +
